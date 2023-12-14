@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'djoser',
     'accounts',
+    'template_specs',
 ]
 
 MIDDLEWARE = [
@@ -179,3 +180,8 @@ DJOSER = {
 }
 
 AUTH_USER_MODEL = 'accounts.UserAccount'
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass
