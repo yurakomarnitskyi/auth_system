@@ -5,19 +5,21 @@ import re
 
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters.command import Command
+from dotenv import load_dotenv
 
 from asgiref.sync import sync_to_async
 
 import django
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "laptops_comment.settings")
 django.setup()
 
 from product_questions.models import Comment
 
 
 logging.basicConfig(level=logging.INFO)
-TOKEN = ''
+load_dotenv()
+TOKEN = os.getenv('TOKEN')
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
@@ -32,16 +34,17 @@ async def cmd_start(message: types.Message):
 
 
 @sync_to_async
-def save_comment(laptop_comment_id, text):
-    parent_comment = Comment.objects.get(pk=laptop_comment_id)
-    Comment.objects.create(parent_comment_id=parent_comment, user_id=1, comment_text=text)
+def save_comment(comment_id, text):
+    parent_comment = Comment.objects.get(pk=comment_id)
+    laptop_id = parent_comment.laptop_id
+    Comment.objects.create(parent_comment_id=parent_comment, user='admin', comment_text=text, laptop_id=laptop_id)
 
 
 @dp.message(F.reply_to_message)
 async def reply_handler(message: types.Message):
     message_text = message.reply_to_message.text
-    laptop_comment_id = re.search(r'.*Comment id (\d*)', message_text).group(1)
-    await save_comment(laptop_comment_id, message.text)
+    comment_id = re.search(r'.*id: (\d*).*', message_text).group(1)
+    await save_comment(comment_id, message.text)
     await message.reply("Answer was posted!")
 
 

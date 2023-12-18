@@ -1,6 +1,8 @@
 import asyncio
+import os
 
 from aiogram import Bot
+from dotenv import load_dotenv
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -18,11 +20,13 @@ def save_comment(sender, instance, **kwargs):
     """
     Send Telegram message with question data when user (is_staff=False) posts a question
     """
-    if instance.user != 1:  # if not admin
-        bot = Bot(token='')
+    if not instance.user.is_staff:
+        load_dotenv()
+        TOKEN = os.getenv('TOKEN')
+        bot = Bot(token=TOKEN)
         message = (
-            str(f'User {instance.user} posted comment on laptop {instance.laptop_id}:\n{instance.comment_text}'
-                f'\n\nComment id {instance.pk}'))
+            str(f'User {instance.user.name} posted comment (id: {instance.pk}) on laptop {instance.laptop_id}:'
+                f'\n\n{instance.comment_text}'))
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
