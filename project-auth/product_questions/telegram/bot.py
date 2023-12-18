@@ -28,7 +28,7 @@ dp = Dispatcher()
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     """
-    Send an instruction to the bot. Logs the chat id.
+    Send instructions for bot. Logs the chat id
     """
     logging.info(f'New chat was register, chat id: {message.from_user.id}')
     await message.answer("Hello! This is bot for Laptop_site administration.")
@@ -36,6 +36,11 @@ async def cmd_start(message: types.Message):
 
 @sync_to_async
 def save_comment(comment_id, text):
+    """
+    :param comment_id: parent comment id
+    :param text: new comment text
+    create a new comment in the database
+    """
     parent_comment = Comment.objects.get(pk=comment_id)
     laptop_id = parent_comment.laptop_id
     Comment.objects.create(parent_comment_id=parent_comment, user='admin', comment_text=text, laptop_id=laptop_id)
@@ -43,10 +48,19 @@ def save_comment(comment_id, text):
 
 @dp.message(F.reply_to_message)
 async def reply_handler(message: types.Message):
+    """
+    processes reply messages
+    call the save_comment function to save the comment with the message text to the database
+    inform user about result
+    """
     message_text = message.reply_to_message.text
-    comment_id = re.search(r'.*id: (\d*).*', message_text).group(1)
-    await save_comment(comment_id, message.text)
-    await message.reply("Answer was posted!")
+    comment_id = re.search(r'.*id: (\d*).*', message_text)
+    if comment_id:
+        comment_id = comment_id.group(1)
+        await save_comment(comment_id, message.text)
+        await message.reply("Answer was posted!")
+    else:
+        await message.answer("This is not a question. Comment wasn't posted")
 
 
 async def main():
