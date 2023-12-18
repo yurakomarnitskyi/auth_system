@@ -11,7 +11,7 @@ from asgiref.sync import sync_to_async
 
 import django
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "laptops_comment.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "auth_system.settings")
 django.setup()
 
 from product_questions.models import Comment
