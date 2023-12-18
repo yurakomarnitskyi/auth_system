@@ -5,11 +5,12 @@ import re
 
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters.command import Command
-from dotenv import load_dotenv
 
 from asgiref.sync import sync_to_async
 
 import django
+
+from dotenv import load_dotenv
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "auth_system.settings")
 django.setup()

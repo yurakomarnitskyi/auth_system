@@ -2,10 +2,11 @@ import asyncio
 import os
 
 from aiogram import Bot
-from dotenv import load_dotenv
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
+from dotenv import load_dotenv
 
 from product_questions.models import Comment
 
