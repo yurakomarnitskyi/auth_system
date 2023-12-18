@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'djoser',
     'accounts',
     'template_specs',
+    'product_questions',
 ]
 
 MIDDLEWARE = [
