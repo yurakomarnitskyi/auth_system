@@ -39,6 +39,10 @@ class SendAnswer(StatesGroup):
     sending_answer = State()
 
 
+yes_no_keyboard = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text="Yes"), KeyboardButton(text="No")]],
+                                      resize_keyboard=True)
+
+
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     """
@@ -50,6 +54,7 @@ async def cmd_start(message: types.Message):
 
 @dp.callback_query(F.data == "answer_question", StateFilter(None))
 async def answer_comment_button(callback: types.CallbackQuery, state: FSMContext):
+    """Handle pressing the 'answer_question' button, awaiting answer"""
     comment_id = get_comment_id_from_message(callback.message.text)
 
     await callback.message.answer(f"Please send your answer to comment with id {comment_id}")
@@ -60,11 +65,12 @@ async def answer_comment_button(callback: types.CallbackQuery, state: FSMContext
 
 @dp.callback_query(F.data == "delete_question", StateFilter(None))
 async def delete_button_handler(callback: types.CallbackQuery, state: FSMContext):
+    """Handle pressing the 'delete_question' button. Send Yes/No keyboard, waiting for confirmation"""
     comment_id = get_comment_id_from_message(callback.message.text)
 
     await callback.message.answer(text=f"Are you sure you want to delete comment with id "
                                        f"{comment_id}?",
-                                  reply_markup=yes_no_keyboard())
+                                  reply_markup=yes_no_keyboard)
     await state.set_state(ConfirmCommentDeletion.confirm_deletion)
     await state.update_data(comment_id=comment_id)
     await callback.answer()
@@ -72,6 +78,7 @@ async def delete_button_handler(callback: types.CallbackQuery, state: FSMContext
 
 @dp.message(SendAnswer.sending_answer)
 async def answer_comment(message: Message, state: FSMContext):
+    """Handle answer after 'answer_question' button"""
     state_info = await state.get_data()
     comment_id = state_info['comment_id']
 
@@ -89,6 +96,7 @@ async def answer_comment(message: Message, state: FSMContext):
 
 @dp.message(ConfirmCommentDeletion.confirm_deletion, F.text.in_(['Yes', 'No']))
 async def delete_comment_confirm(message: Message, state: FSMContext):
+    """Deletion confirmation processing"""
     state_info = await state.get_data()
     comment_id = state_info['comment_id']
 
@@ -108,13 +116,14 @@ async def delete_comment_confirm(message: Message, state: FSMContext):
     await state.clear()
 
 
-def yes_no_keyboard():
-    yes = KeyboardButton(text="Yes")
-    no = KeyboardButton(text="No")
-    return ReplyKeyboardMarkup(keyboard=[[yes, no]], resize_keyboard=True)
+@dp.message(StateFilter("ConfirmCommentDeletion:confirm_deletion"))
+async def incorrect_input(message: Message):
+    """Handle any incorrect input during confirmation"""
+    await message.reply("Please, choose your answer on the keyboard", reply_markup=yes_no_keyboard)
 
 
 def get_comment_id_from_message(message_text):
+    """Get comment id from message text"""
     search_id = re.search(r'.*id: (\d*).*', message_text)
     if search_id:
         comment_id = search_id.group(1)
@@ -125,6 +134,9 @@ def get_comment_id_from_message(message_text):
 
 @sync_to_async
 def delete_comment_from_db(comment_id):
+    """
+    delete comment from database by given id
+    """
     Comment.objects.get(pk=comment_id).delete()
 
 
@@ -133,7 +145,7 @@ def save_comment_to_db(comment_id, text):
     """
     :param comment_id: parent comment id
     :param text: new comment text
-    create a new comment in the database
+    create a new comment in the database with given text and parent comment id
     """
     parent_comment = Comment.objects.get(pk=comment_id)
     laptop_id = parent_comment.laptop_id
