@@ -27,6 +27,7 @@ from product_questions.models import Comment
 logging.basicConfig(level=logging.INFO)
 load_dotenv()
 TOKEN = os.getenv('TOKEN')
+USER_ID = os.getenv('USER_ID')
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
@@ -149,7 +150,7 @@ def save_comment_to_db(comment_id, text):
     """
     parent_comment = Comment.objects.get(pk=comment_id)
     laptop_id = parent_comment.laptop_id
-    user = UserAccount.objects.get(pk=1)
+    user = UserAccount.objects.get(pk=USER_ID)
     Comment.objects.create(parent_comment_id=parent_comment, user=user, comment_text=text, laptop_id=laptop_id)
 
 
