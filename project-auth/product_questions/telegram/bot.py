@@ -13,7 +13,6 @@ from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup, ReplyKey
 from asgiref.sync import sync_to_async
 
 import django
-from django.core.exceptions import ObjectDoesNotExist
 
 from dotenv import load_dotenv
 
@@ -87,9 +86,12 @@ async def answer_comment(message: Message, state: FSMContext):
         try:
             await save_comment_to_db(comment_id, message.text)
             await message.reply("Answer was posted", reply_markup=ReplyKeyboardRemove())
-        except ObjectDoesNotExist:
+        except Comment.DoesNotExist:
             await message.answer(f"Comment with id {comment_id} does not exist",
                                  reply_markup=ReplyKeyboardRemove())
+        except UserAccount.DoesNotExist:
+            logging.error("User does not exist")
+            await message.reply("Something went wrong")
     else:
         await message.answer("Something went wrong", reply_markup=ReplyKeyboardRemove())
     await state.clear()
@@ -109,7 +111,7 @@ async def delete_comment_confirm(message: Message, state: FSMContext):
                 await delete_comment_from_db(comment_id)
                 await message.answer(f"Comment {comment_id} was successfully deleted",
                                      reply_markup=ReplyKeyboardRemove())
-            except ObjectDoesNotExist:
+            except Comment.DoesNotExist:
                 await message.answer(f"Comment with id {comment_id} does not exist",
                                      reply_markup=ReplyKeyboardRemove())
         else:
@@ -168,8 +170,11 @@ async def reply_handler(message: types.Message):
         try:
             await save_comment_to_db(comment_id, message.text)
             await message.reply("Answer was posted!")
-        except ObjectDoesNotExist:
+        except Comment.DoesNotExist:
             await message.reply(f"Comment with id {comment_id} does not exist")
+        except UserAccount.DoesNotExist:
+            logging.error("User does not exist")
+            await message.reply("Something went wrong")
     else:
         await message.reply("This is not a comment")
 
