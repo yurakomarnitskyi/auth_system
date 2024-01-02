@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'accounts',
     'template_specs',
     'product_questions',
+    'favorites'
 ]
 
 MIDDLEWARE = [

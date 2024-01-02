@@ -7,7 +7,8 @@ from  accounts.views import my_view
 urlpatterns = [
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')), 
-    path('questions/', include('product_questions.urls'))
+    path('questions/', include('product_questions.urls')),
+    path('favorites/', include('favorites.urls')),
 ]
 
 
