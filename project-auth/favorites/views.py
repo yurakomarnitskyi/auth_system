@@ -15,9 +15,10 @@ from .models import Favorites
 load_dotenv()
 REDIS_HOST = os.getenv('REDIS_HOST')
 REDIS_PORT = os.getenv('REDIS_PORT')
+REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
 ttl_redis = 86_400  # 24h
 ttl_cookie = 2_592_000  # 30 days
-r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True, db=0)
+r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD, decode_responses=True, db=0)
 
 
 def generate_custom_id(length=10):

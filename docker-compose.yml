@@ -13,6 +13,10 @@ services:
 
   redis:
     image: redis
+    volumes:
+           - ./redis.conf:/usr/local/etc/redis/redis.conf
+           - redis_data:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
     ports:
       - "6380:6379"
 
@@ -24,3 +28,6 @@ services:
       - POSTGRES_DB=auth_system
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+
+volumes:
+  redis_data:
