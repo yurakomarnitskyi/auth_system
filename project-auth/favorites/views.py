@@ -14,7 +14,8 @@ from rest_framework.response import Response
 load_dotenv()
 REDIS_HOST = os.getenv('REDIS_HOST')
 REDIS_PORT = os.getenv('REDIS_PORT')
-ttl = 86_400  # 24h
+ttl_redis = 86_400  # 24h
+ttl_cookie = 2_592_000  # 30 days
 r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True, db=0)
 
 
@@ -56,17 +57,17 @@ def add_favorites(favorites_id, laptop_id):
         users_favorites_list = r.lrange(favorites_id, 0, -1)
         if laptop_id not in users_favorites_list:
             r.lpush(favorites_id, laptop_id)
-            r.expire(favorites_id, ttl)
+            r.expire(favorites_id, ttl_redis)
     else:
         try:
             users_favorites_list = list(Favorites.objects.get(favorites_id=favorites_id).saved_laptops)
             users_favorites_list.append(laptop_id)
             for i in users_favorites_list:
                 r.lpush(favorites_id, i)
-            r.expire(favorites_id, ttl)
+            r.expire(favorites_id, ttl_redis)
         except Favorites.DoesNotExist:
             r.lpush(favorites_id, laptop_id)
-            r.expire(favorites_id, ttl)
+            r.expire(favorites_id, ttl_redis)
 
 
 def get_favorites_id(request, response):
@@ -76,5 +77,5 @@ def get_favorites_id(request, response):
     favorites_id = request.COOKIES.get('favorites_id', None)
     if not favorites_id:
         favorites_id = generate_custom_id()
-        response.set_cookie('favorites_id', favorites_id, max_age=300, secure=True, httponly=True, samesite='None')
+    response.set_cookie('favorites_id', favorites_id, max_age=ttl_cookie, secure=True, httponly=True, samesite='None')
     return favorites_id
