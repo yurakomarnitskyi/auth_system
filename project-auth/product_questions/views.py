@@ -9,10 +9,8 @@ from rest_framework import status
 
 class CommentViewSet(APIView):
     """
-    A viewset for viewing and editing comment instances.
+    A viewset for viewing and posting comment instances.
     """
-    # serializer_class = CommentSerializer
-    # queryset = Comment.objects.all()
 
     def get(self, request):
         laptop_id = self.request.query_params.get('laptop_id')
