@@ -1,15 +1,16 @@
-import redis
+import os
 import random
 import string
-import os
 
-from rest_framework import status
 from dotenv import load_dotenv
 
-from .models import Favorites
+import redis
 
-from rest_framework.views import APIView
+from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .models import Favorites
 
 load_dotenv()
 REDIS_HOST = os.getenv('REDIS_HOST')
