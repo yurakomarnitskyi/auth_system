@@ -35,7 +35,7 @@ class SaveFavorite(APIView):
         favorites_id = get_favorites_id(request, response)
 
         favorites = r.lrange(favorites_id, 0, -1)
-        response.data = favorites
+        response.data = {"favorites": favorites}
         return response
 
     def post(self, request, *args, **kwargs):
@@ -55,7 +55,6 @@ def add_favorites(favorites_id, laptop_id):
     laptop_id = str(laptop_id)
 
     if favorites_id in r.keys():
-        print('redis')
         users_favorites_list = r.lrange(favorites_id, 0, -1)
         if laptop_id not in users_favorites_list:
             r.lpush(favorites_id, laptop_id)
