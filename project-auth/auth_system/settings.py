@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-from datetime import timedelta
 from pathlib import Path
 import os
 from datetime import timedelta
@@ -17,25 +16,25 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
 
-with open("private_key.pem", "rb") as key_file:
-    private_key = serialization.load_pem_private_key(
+with open("/usr/src/auth_system/project-auth/private_key.pem", "rb") as key_file:
+    private_key_pem = serialization.load_pem_private_key(
         key_file.read(),
         password=None,
         backend=default_backend()
     )
-private_key = private_key.private_bytes(
+private_key = private_key_pem.private_bytes(
     encoding=serialization.Encoding.PEM,
     format=serialization.PrivateFormat.TraditionalOpenSSL,
     encryption_algorithm=serialization.NoEncryption()
 ).decode('utf-8')
 
-with open("public_key.pem", "rb") as key_file:
-    public_key = serialization.load_pem_public_key(
+with open("/usr/src/auth_system/project-auth/public_key.pem", "rb") as key_file:
+    PUBLIC_KEY_PEM = serialization.load_pem_public_key(
         key_file.read(),
         backend=default_backend()
     )
 
-public_key = public_key.public_bytes(
+public_key = PUBLIC_KEY_PEM.public_bytes(
     encoding=serialization.Encoding.PEM,
     format=serialization.PublicFormat.SubjectPublicKeyInfo
 ).decode('utf-8')
@@ -186,7 +185,7 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
@@ -214,11 +213,11 @@ SIMPLE_JWT = {
     "JTI_CLAIM": "jti",
 
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
-    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=60),
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 
-    "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
-    "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
+    "TOKEN_OBTAIN_SERIALIZER": "accounts.serializers.TokenObtainPairSerializerDifferentToken",
+    "TOKEN_REFRESH_SERIALIZER": "accounts.serializers.TokenRefreshSerializerDifferentToken",
     "TOKEN_VERIFY_SERIALIZER": "rest_framework_simplejwt.serializers.TokenVerifySerializer",
     "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
