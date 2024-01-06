@@ -12,29 +12,24 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 import os
 from datetime import timedelta
-from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.backends import default_backend
 
 
-with open("/usr/src/auth_system/project-auth/private_key.pem", "rb") as key_file:
-    private_key_pem = serialization.load_pem_private_key(
-        key_file.read(),
-        password=None,
-        backend=default_backend()
-    )
-private_key = private_key_pem.private_bytes(
+PRIVATE_KEY = rsa.generate_private_key(
+    public_exponent=65537,
+    key_size=2048,
+    backend=default_backend()
+)
+PUBLIC_KEY = PRIVATE_KEY.public_key()
+
+PRIVATE_KEY_PEM = PRIVATE_KEY.private_bytes(
     encoding=serialization.Encoding.PEM,
     format=serialization.PrivateFormat.TraditionalOpenSSL,
     encryption_algorithm=serialization.NoEncryption()
 ).decode('utf-8')
-
-with open("/usr/src/auth_system/project-auth/public_key.pem", "rb") as key_file:
-    PUBLIC_KEY_PEM = serialization.load_pem_public_key(
-        key_file.read(),
-        backend=default_backend()
-    )
-
-public_key = PUBLIC_KEY_PEM.public_bytes(
+PUBLIC_KEY_PEM = PUBLIC_KEY.public_bytes(
     encoding=serialization.Encoding.PEM,
     format=serialization.PublicFormat.SubjectPublicKeyInfo
 ).decode('utf-8')
@@ -52,7 +47,7 @@ SECRET_KEY = 'django-insecure-gt+&h62@f_#2#f)4jt$%&=#nj2ff2=-2q+!zy^5z@r0*l%6s(l
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["0.0.0.0", "127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -192,8 +187,8 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": False,
 
     "ALGORITHM": "RS256",
-    "SIGNING_KEY": private_key,
-    "VERIFYING_KEY": public_key,
+    "SIGNING_KEY": PRIVATE_KEY_PEM,
+    "VERIFYING_KEY": PUBLIC_KEY_PEM,
     "AUDIENCE": None,
     "ISSUER": None,
     "JSON_ENCODER": None,
@@ -242,7 +237,6 @@ DJOSER = {
         'user': 'accounts.serializers.UserCreateSerializer',
         'user_delete': 'djoser.serializers.UserDeleteSerializer',
     }
-     
 }
 
 AUTH_USER_MODEL = 'accounts.UserAccount'
