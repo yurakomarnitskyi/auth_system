@@ -38,17 +38,6 @@ services:
     networks:
       - 'lappy_network'
 
-  kraken:
-    image: devopsfaith/krakend:watch
-    container_name: kraken
-    volumes:
-      - ./krakend.json:/etc/krakend/krakend.json
-    command: [ "run", "-c", "krakend.json" ]
-    ports:
-      - "8080:8080"
-    networks:
-      - 'lappy_network'
-
 volumes:
   redis_data:
 
