@@ -1,0 +1,2 @@
+0 1 * * * /usr/local/bin/python /usr/src/auth_system/project-auth/update_fav_postgres.py update >> /tmp/postgres_update.log 2>&1
+0 3 * * 1 /usr/local/bin/python /usr/src/auth_system/project-auth/update_fav_postgres.py clear >> /tmp/postgres_update.log 2>&1
