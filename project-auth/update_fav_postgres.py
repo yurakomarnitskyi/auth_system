@@ -33,10 +33,9 @@ def update_postgres_from_redis():
         for key in r.scan_iter():
             data = r.lrange(key, 0, -1)
             obj, created = Favorites.objects.update_or_create(favorites_id=key, defaults={'saved_laptops': data})
-            logging.info("Data was updated successfully.")
+        logging.info("Data was updated successfully.")
     except Exception:
         logging.exception("Error occurred")
-    logging.info("updated")
 
 
 def clear_old_records():
