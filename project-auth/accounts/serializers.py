@@ -76,6 +76,11 @@ class RefreshTokenWithAnotherTokenBackend(RefreshToken, TokenWithAnotherTokenBac
         for claim, value in self.headers.items():
             access.headers[claim] = value
 
+        if 'kid' not in access.headers:
+            key = JsonWebKey.import_key(
+                settings.SIMPLE_JWT['VERIFYING_KEY'], {'kty': 'RSA'}).thumbprint()
+            access.headers['kid'] = key
+
         return access
 
 
