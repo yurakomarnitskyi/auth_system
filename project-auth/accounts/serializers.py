@@ -1,5 +1,4 @@
 import jwt
-import rest_framework_simplejwt.views as original_views
 from authlib.jose import JsonWebKey
 from django.conf import settings
 from rest_framework_simplejwt.backends import TokenBackend
@@ -22,6 +21,8 @@ class UserCreateSerializer(UserCreateSerializer):
 
 class TokenBackendWithHeaders(TokenBackend):
     def encode(self, payload, headers={}):
+        """Returns an encoded token for the given
+        payload and headers dictionaries."""
         jwt_payload = payload.copy()
         if self.audience is not None:
             jwt_payload["aud"] = self.audience
@@ -31,9 +32,7 @@ class TokenBackendWithHeaders(TokenBackend):
         token = jwt.encode(jwt_payload, self.signing_key,
                            algorithm=self.algorithm, headers=headers)
         if isinstance(token, bytes):
-            # For PyJWT <= 1.7.1
             return token.decode("utf-8")
-        # For PyJWT >= 2.0.0a1
         return token
 
 
@@ -49,10 +48,12 @@ class TokenWithAnotherTokenBackend(Token):
     )
 
     def __init__(self, token=None, verify=True):
+        """Add headers to default Token"""
         Token.__init__(self, token, verify)
         self.headers = {}
 
     def __str__(self):
+        """Sign and return a token."""
         return self.get_token_backend().encode(self.payload, self.headers)
 
 
@@ -61,18 +62,19 @@ class AccessTokenWithAnotherTokenBackend(AccessToken, TokenWithAnotherTokenBacke
 
 
 class RefreshTokenWithAnotherTokenBackend(RefreshToken, TokenWithAnotherTokenBackend):
-
     @property
     def access_token(self):
+        """
+        Returns an access token created from this refresh
+        token. Add 'kid' into a header of new token.
+        """
         access = AccessTokenWithAnotherTokenBackend()
         access.set_exp(from_time=self.current_time)
-
         no_copy = self.no_copy_claims
         for claim, value in self.payload.items():
             if claim in no_copy:
                 continue
             access[claim] = value
-
         for claim, value in self.headers.items():
             access.headers[claim] = value
 
@@ -80,7 +82,6 @@ class RefreshTokenWithAnotherTokenBackend(RefreshToken, TokenWithAnotherTokenBac
             key = JsonWebKey.import_key(
                 settings.SIMPLE_JWT['VERIFYING_KEY'], {'kty': 'RSA'}).thumbprint()
             access.headers['kid'] = key
-
         return access
 
 
@@ -89,41 +90,27 @@ class TokenObtainPairSerializerDifferentToken(TokenObtainPairSerializer):
 
     @classmethod
     def get_token(cls, user):
-
+        """Add 'kid' into a header of new token."""
         key = JsonWebKey.import_key(
             settings.SIMPLE_JWT['VERIFYING_KEY'], {'kty': 'RSA'})
         token = cls.token_class.for_user(user)
-
         token.headers['kid'] = key.thumbprint()
-
         return token
 
 
 class TokenRefreshSerializerDifferentToken(TokenRefreshSerializer):
     def validate(self, attrs):
+        """Validate token's data"""
         refresh = RefreshTokenWithAnotherTokenBackend(attrs['refresh'])
-
         data = {'access': str(refresh.access_token)}
-
         if api_settings.ROTATE_REFRESH_TOKENS:
             if api_settings.BLACKLIST_AFTER_ROTATION:
                 try:
                     refresh.blacklist()
                 except AttributeError:
                     pass
-
             refresh.set_jti()
             refresh.set_exp()
             refresh.set_iat()
-
             data['refresh'] = str(refresh)
-
         return data
-
-
-class TokenObtainPairView(original_views.TokenObtainPairView):
-    serializer_class = TokenObtainPairSerializerDifferentToken
-
-
-class TokenRefreshView(original_views.TokenRefreshView):
-    serializer_class = TokenRefreshSerializerDifferentToken
