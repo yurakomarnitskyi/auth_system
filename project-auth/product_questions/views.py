@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from .models import Comment
 from .serializers import CommentSerializer
@@ -12,6 +13,14 @@ class CommentViewSet(APIView):
     A viewset for viewing and posting comment instances.
     """
 
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.request.method == 'POST':
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
     def get(self, request):
         laptop_id = self.request.query_params.get('laptop_id')
         queryset = Comment.objects.filter(laptop_id=laptop_id)
@@ -19,8 +28,6 @@ class CommentViewSet(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        if not request.user.is_authenticated:
-            return Response("You're not authorized to comment, please log in", status=status.HTTP_401_UNAUTHORIZED)
         data = request.data
         data['user'] = request.user.pk
         serializer = CommentSerializer(data=data)
