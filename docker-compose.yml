@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  auth_system:
+    build: .
+    container_name: auth_system
+    ports:
+      - "8005:8005"
+    depends_on:
+      - redis
+      - postgres
+    command: supervisord -c supervisord.conf
+    restart: on-failure
+    networks:
+      - 'lappy_network'
+
+  redis:
+    image: redis
+    container_name: redis
+    volumes:
+           - ./redis.conf:/usr/local/etc/redis/redis.conf
+           - redis_data:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - "6380:6379"
+    networks:
+      - 'lappy_network'
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=auth_system
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - 'lappy_network'
+
+volumes:
+  redis_data:
+
+networks:
+  lappy_network:
+    driver: bridge

@@ -1,7 +1,7 @@
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 
 from .views import CommentViewSet
 
-router = DefaultRouter()
-router.register(r'', CommentViewSet, basename='comment')
-urlpatterns = router.urls
+urlpatterns = [
+    path('', CommentViewSet.as_view(), name='save-favorites'),
+]
