@@ -28,7 +28,12 @@ logging.basicConfig(level=logging.INFO,
 
 
 def update_postgres_from_redis():
-    """Copy 'favorites' data from redis to postgres"""
+    """
+    Synchronizes 'favorites' data from Redis to PostgreSQL.
+
+    Iterates over all keys in Redis, retrieves the corresponding 'favorites' data, and either
+    updates existing records or creates new ones in the PostgreSQL 'Favorites' table.
+    """
     try:
         for key in r.scan_iter():
             data = r.lrange(key, 0, -1)
@@ -39,7 +44,12 @@ def update_postgres_from_redis():
 
 
 def clear_old_records():
-    """Clear irrelevant 'favorites' data (no views for more than 30 days)"""
+    """
+    Deletes outdated 'favorites' records from PostgreSQL.
+
+    Identifies and removes any 'favorites' records in the PostgreSQL database that have not
+    been updated in the last 30 days.
+    """
     try:
         now = timezone.now()
         thirty_days_ago = now - datetime.timedelta(days=30)
