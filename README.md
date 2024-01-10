@@ -45,18 +45,18 @@ This microservice provides JWT Authentication, managing user's favorites and pro
 
 - `/favorites`: GET or POST User's favorite list
   
-- '/auth/users/: POST User's register
+- `/auth/users/`: POST User's register
   
-- '/auth/users/activation/': POST User's activation account
+- `/auth/users/activation/`: POST User's activation account
 
-- '/auth/jwt/create/': POST Login user's and generates token
+- `/auth/jwt/create/`: POST Login user's and generates token
 
-- '/auth/jwt/refresh/': POST Refresh token
+- `/auth/jwt/refresh/`: POST Refresh token
 
-- '/auth/users/reset_password/': POST Password reset request
+- `/auth/users/reset_password/`: POST Password reset request
 
-- '/auth/users/reset_password_confirm/': POST Confirm and set a new password
+- `/auth/users/reset_password_confirm/`: POST Confirm and set a new password
 
-- '/auth/users/me/': DELETE Account deletion
+- `/auth/users/me/`: DELETE Account deletion
 
 
