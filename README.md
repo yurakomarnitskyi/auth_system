@@ -44,7 +44,7 @@ This microservice provides JWT Authentication, managing user's favorites and pro
 - `/questions`: GET or POST User's questions
 
 - `/favorites`: GET or POST User's favorite list
-- 
+  
 - '/auth/users/: POST User's register
   
 - '/auth/users/activation/': POST User's activation account
