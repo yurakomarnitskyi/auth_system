@@ -18,7 +18,15 @@ bot = Bot(token=TOKEN)
 
 
 async def send_update_info(text, bot):
-    """Send Telegram message to a specific chat with given text and buttons 'Answer question', 'Delete question'"""
+    """
+    This function is designed to send a message to a predefined chat on Telegram. It includes
+    'Answer question' and 'Delete question' as inline keyboard buttons for interactive responses.
+
+    Args:
+        text (str): The message text to be sent.
+        bot: The Telegram bot instance used for sending the message.
+    It requires an active session with the Telegram bot and access to the specific CHAT_ID.
+    """
     markup = InlineKeyboardBuilder()
 
     answer = types.InlineKeyboardButton(text='\U00002705 Answer question', callback_data="answer_question")
@@ -33,7 +41,15 @@ async def send_update_info(text, bot):
 @receiver(post_save, sender=Comment)
 def save_comment(sender, instance, **kwargs):
     """
-    Send Telegram message with question data when user (is_staff=False) posts a question
+    Signal receiver that sends a Telegram message when a new comment is posted by a non-staff user.
+
+    Triggered on saving a Comment instance. If the user is not staff, formats a message
+    with comment details and sends it to Telegram using an asynchronous task.
+
+    Args:
+        sender (Model): The model class that sent the signal.
+        instance (Comment): The instance of the Comment model that was saved.
+        **kwargs: Additional keyword arguments passed with the signal.
     """
     if not instance.user.is_staff:
         message = (

@@ -10,12 +10,12 @@ from rest_framework import status
 
 class CommentViewSet(APIView):
     """
-    A viewset for viewing and posting comment instances.
+    Viewset for handling the retrieval and posting of comments.
     """
 
     def get_permissions(self):
         """
-        Instantiates and returns the list of permissions that this view requires.
+        Defines permissions based on the request method.
         """
         if self.request.method == 'POST':
             return [IsAuthenticated()]
