@@ -3,6 +3,7 @@ import os
 
 from aiogram import Bot, types
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.enums.parse_mode import ParseMode
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -14,7 +15,7 @@ from product_questions.models import Comment
 load_dotenv()
 CHAT_ID = os.getenv('CHAT_ID')
 TOKEN = os.getenv('TOKEN')
-bot = Bot(token=TOKEN)
+bot = Bot(token=TOKEN, parse_mode=ParseMode.HTML)
 
 
 async def send_update_info(text, bot):
@@ -53,7 +54,7 @@ def save_comment(sender, instance, **kwargs):
     """
     if not instance.user.is_staff:
         message = (
-            str(f'User {instance.user.name} posted comment (id: {instance.pk}) on laptop {instance.laptop_id}:'
+            str(f'<b>{instance.user.name}</b> posted comment (id: {instance.pk}) on laptop {instance.laptop_name}:'
                 f'\n\n{instance.comment_text}'))
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
