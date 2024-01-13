@@ -27,22 +27,6 @@ logging.basicConfig(level=logging.INFO,
                     )
 
 
-def update_postgres_from_redis():
-    """
-    Synchronizes 'favorites' data from Redis to PostgreSQL.
-
-    Iterates over all keys in Redis, retrieves the corresponding 'favorites' data, and either
-    updates existing records or creates new ones in the PostgreSQL 'Favorites' table.
-    """
-    try:
-        for key in r.scan_iter():
-            data = r.lrange(key, 0, -1)
-            obj, created = Favorites.objects.update_or_create(favorites_id=key, defaults={'saved_laptops': data})
-        logging.info("Data was updated successfully.")
-    except Exception:
-        logging.exception("Error occurred")
-
-
 def clear_old_records():
     """
     Deletes outdated 'favorites' records from PostgreSQL.
@@ -52,17 +36,12 @@ def clear_old_records():
     """
     try:
         now = timezone.now()
-        thirty_days_ago = now - datetime.timedelta(days=30)
-        count, _ = Favorites.objects.filter(updated_at__lt=thirty_days_ago).delete()
+        days_ago = now - datetime.timedelta(days=90)
+        count, _ = Favorites.objects.filter(updated_at__lt=days_ago).delete()
         logging.info(f"Data was deleted successfully. Deleted {count} records")
     except Exception:
         logging.exception("Error occurred")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        parameter = sys.argv[1]
-        if parameter == "clear":
-            clear_old_records()
-        elif parameter == "update":
-            update_postgres_from_redis()
+    clear_old_records()
