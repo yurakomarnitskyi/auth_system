@@ -49,7 +49,8 @@ async def cmd_start(message: types.Message):
     Function for sending instructions for bot, logging the chat id
     """
     logging.info(f'New chat was register, chat id: {message.from_user.id}')
-    await message.answer("Hello! This is bot for Laptop_site administration.")
+    await message.answer("Hi, I'm a bot for live answering questions on the Lappy website. "
+                         "I will send you a message if you have a new question.")
 
 
 @dp.callback_query(F.data == "answer_question", StateFilter(None))
