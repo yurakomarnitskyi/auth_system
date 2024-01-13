@@ -21,7 +21,7 @@ ttl_cookie = 7_776_000  # 90 days
 r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD, decode_responses=True, db=0)
 
 
-class Favorites(APIView):
+class FavoritesView(APIView):
     """
     API View for managing user's favorite laptops. Handles GET and POST requests.
     """
